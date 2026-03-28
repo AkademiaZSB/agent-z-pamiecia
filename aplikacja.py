@@ -4,13 +4,33 @@ import requests
 from bs4 import BeautifulSoup
 import sqlite3
 import os
+import smtplib
+from email.mime.text import MIMEText
 from datetime import datetime
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# Klucz API - działa lokalnie i na Streamlit Cloud
+# Klucze - działają lokalnie i na Streamlit Cloud
 if "ANTHROPIC_API_KEY" in st.secrets:
     os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+
+def wyslij_email(do: str, temat: str, tresc: str) -> bool:
+    try:
+        gmail = st.secrets.get("GMAIL_EMAIL") or os.environ.get("GMAIL_EMAIL")
+        haslo = st.secrets.get("GMAIL_HASLO") or os.environ.get("GMAIL_HASLO")
+        if not gmail or not haslo:
+            return False
+        wiadomosc = MIMEText(tresc, "plain", "utf-8")
+        wiadomosc["Subject"] = temat
+        wiadomosc["From"] = gmail
+        wiadomosc["To"] = do
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+            s.login(gmail, haslo)
+            s.send_message(wiadomosc)
+        return True
+    except Exception as e:
+        st.error(f"Błąd wysyłania: {e}")
+        return False
 
 BAZA = "pamiec.db"
 
@@ -166,6 +186,19 @@ with zakładka1:
             st.subheader("Gotowy content:")
             st.markdown(content)
             st.download_button("Pobierz", content, file_name="content.txt")
+
+            st.divider()
+            st.subheader("Wyślij emailem")
+            adres_email = st.text_input("Adres email odbiorcy:")
+            temat_email = st.text_input("Temat:", value=f"Propozycja współpracy")
+            if st.button("Wyślij email"):
+                if not adres_email:
+                    st.error("Podaj adres email.")
+                else:
+                    if wyslij_email(adres_email, temat_email, content):
+                        st.success(f"Email wysłany do: {adres_email}")
+                    else:
+                        st.error("Brak konfiguracji email w Secrets (GMAIL_EMAIL, GMAIL_HASLO)")
 
 with zakładka2:
     firmy = pobierz_wszystkie_firmy()
