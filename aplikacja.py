@@ -8,6 +8,10 @@ from datetime import datetime
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+# Klucz API - działa lokalnie i na Streamlit Cloud
+if "ANTHROPIC_API_KEY" in st.secrets:
+    os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+
 BAZA = "pamiec.db"
 
 # ============================================================
