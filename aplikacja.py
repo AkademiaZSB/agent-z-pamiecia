@@ -183,22 +183,25 @@ with zakładka1:
                 content = agent_copywriter(analiza, typ)
                 zapisz_content(url, typ, content)
 
-            st.subheader("Gotowy content:")
-            st.markdown(content)
-            st.download_button("Pobierz", content, file_name="content.txt")
+            st.session_state["content"] = content
 
-            st.divider()
-            st.subheader("Wyślij emailem")
-            adres_email = st.text_input("Adres email odbiorcy:")
-            temat_email = st.text_input("Temat:", value=f"Propozycja współpracy")
-            if st.button("Wyślij email"):
-                if not adres_email:
-                    st.error("Podaj adres email.")
+    if "content" in st.session_state:
+        st.subheader("Gotowy content:")
+        st.markdown(st.session_state["content"])
+        st.download_button("Pobierz", st.session_state["content"], file_name="content.txt")
+
+        st.divider()
+        st.subheader("Wyślij emailem")
+        adres_email = st.text_input("Adres email odbiorcy:")
+        temat_email = st.text_input("Temat:", value="Propozycja współpracy")
+        if st.button("Wyślij email"):
+            if not adres_email:
+                st.error("Podaj adres email.")
+            else:
+                if wyslij_email(adres_email, temat_email, st.session_state["content"]):
+                    st.success(f"Email wysłany do: {adres_email}")
                 else:
-                    if wyslij_email(adres_email, temat_email, content):
-                        st.success(f"Email wysłany do: {adres_email}")
-                    else:
-                        st.error("Brak konfiguracji email w Secrets (GMAIL_EMAIL, GMAIL_HASLO)")
+                    st.error("Brak konfiguracji email w Secrets (GMAIL_EMAIL, GMAIL_HASLO)")
 
 with zakładka2:
     firmy = pobierz_wszystkie_firmy()
