@@ -147,7 +147,13 @@ def agent_copywriter(analiza, typ):
 ANALIZA FIRMY:
 {analiza}
 
-Użyj konkretnych informacji. Pisz po polsku."""}]
+Zasady formatowania:
+- Pisz czysty tekst, bez markdown (bez **, bez #, bez ---)
+- Nie zaczynaj od "Temat:" ani żadnego nagłówka
+- Listy pisz jako zwykłe zdania lub z myślnikiem i spacją, bez pogrubień
+- Zacznij bezpośrednio od treści wiadomości
+
+Pisz po polsku. Użyj konkretnych informacji z analizy."""}]
     )
     return odpowiedz.content[0].text
 
